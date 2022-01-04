@@ -158,6 +158,17 @@ class BucketExplorerPanel(PagePanel):
 
         return StandardPanel(body, title=self.title)
 
+    def _reset(self):
+        self.page = 1
+        self.cursor = 0
+        self._files = []
+
+    def watch_bucket(self, bucket):
+        self._reset()
+
+    def watch_prefix(self, prefix):
+        self._reset()
+
 
 class HelpPanel(Widget):
     def __init__(self, commands):
