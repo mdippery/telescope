@@ -1,3 +1,5 @@
+import math
+
 import boto3
 from rich import box
 from rich.align import Align
@@ -5,6 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
 from rich.table import Table
+from textual.reactive import Reactive
 from textual.widget import Widget
 
 
@@ -12,6 +15,8 @@ console = Console()
 
 
 class BucketListPanel(Widget):
+    page = Reactive(1)
+
     def __init__(self, page):
         super().__init__()
         self.page = page
@@ -25,16 +30,24 @@ class BucketListPanel(Widget):
         return self._buckets
 
     @property
-    def max_items(self):
+    def max_items_per_page(self):
         return console.size[1] - 2
 
     @property
     def first_item(self):
-        return self.max_items * (self.page - 1)
+        return self.max_items_per_page * (self.page - 1)
 
     @property
     def last_item(self):
-        return self.max_items * self.page
+        return self.max_items_per_page * self.page
+
+    @property
+    def min_page(self):
+        return 1
+
+    @property
+    def max_page(self):
+        return math.ceil(len(self.buckets) / self.max_items_per_page)
 
     def render(self):
         body = Table("Name", box=None, expand=True, show_header=False)
@@ -44,3 +57,12 @@ class BucketListPanel(Widget):
             body.add_row(bucket["Name"])
 
         return Panel(body, title="Buckets", border_style="blue", box=box.ROUNDED)
+
+    def page_forward(self):
+        # TODO: Don't show blanks at end of last page
+        if self.page + 1 <= self.max_page:
+            self.page += 1
+
+    def page_back(self):
+        if self.page - 1 >= self.min_page:
+            self.page -= 1
