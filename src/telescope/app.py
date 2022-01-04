@@ -43,6 +43,11 @@ class Telescope(App):
             "open_selected_item",
             "Open selected item",
         ),
+        Command(
+            ["p", Keys.Left],
+            "go_back",
+            "Go back one level in file hierarchy",
+        ),
         Command(["?"], "toggle_help", "Show or hide Telescope help"),
     ]
 
@@ -93,4 +98,8 @@ class Telescope(App):
         self.show_explorer = True
 
     async def watch_show_explorer(self, show_explorer):
-        self.explorer_panel.layout_offset_y = 0
+        y = 0 if show_explorer else -self.console.size[1]
+        self.explorer_panel.layout_offset_y = y
+
+    async def action_go_back(self):
+        self.show_explorer = False

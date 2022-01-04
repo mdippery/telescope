@@ -144,6 +144,8 @@ class BucketExplorerPanel(PagePanel):
     def render(self):
         body = StandardTable("Name")
 
+        # TODO: Add ../ entry
+        # TODO: Display as folder hierarchy
         start, end = self.first_item, self.last_item + 1
         for i, file in enumerate(self.files[start:end], start):
             text = file["Key"]
