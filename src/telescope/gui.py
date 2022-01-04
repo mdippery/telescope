@@ -21,7 +21,7 @@ def StandardTable(*cols):
 
 class PagePanel(Widget):
     page = Reactive(1)
-    selected_item = Reactive(0)
+    cursor = Reactive(0)
 
     def __init__(self, page):
         super().__init__()
@@ -34,7 +34,7 @@ class PagePanel(Widget):
     @property
     def first_item(self):
         if self.page == self.max_page:
-            return len(self.items) - self.max_items_per_page
+            return max(len(self.items) - self.max_items_per_page, 0)
         return self.max_items_per_page * (self.page - 1)
 
     @property
@@ -57,32 +57,36 @@ class PagePanel(Widget):
     def max_item(self):
         return len(self.items) - 1
 
+    @property
+    def item(self):
+        return self.buckets[self.cursor]
+
     def page_forward(self):
         if self.page + 1 <= self.max_page:
             self.page += 1
-            self.selected_item = self.first_item
+            self.cursor = self.first_item
         else:
             self.console.bell()
 
     def page_back(self):
         if self.page - 1 >= self.min_page:
             self.page -= 1
-            self.selected_item = self.last_item
+            self.cursor = self.last_item
         else:
             self.console.bell()
 
     def select_next(self):
-        if self.selected_item + 1 <= self.max_item:
-            self.selected_item += 1
-            if self.selected_item > self.last_item:
+        if self.cursor + 1 <= self.max_item:
+            self.cursor += 1
+            if self.cursor > self.last_item:
                 self.page_forward()
         else:
             self.console.bell()
 
     def select_previous(self):
-        if self.selected_item - 1 >= self.min_item:
-            self.selected_item -= 1
-            if self.selected_item < self.first_item:
+        if self.cursor - 1 >= self.min_item:
+            self.cursor -= 1
+            if self.cursor < self.first_item:
                 self.page_back()
         else:
             self.console.bell()
@@ -108,11 +112,46 @@ class BucketListPanel(PagePanel):
         start, end = self.first_item, self.last_item + 1
         for i, bucket in enumerate(self.buckets[start:end], start):
             text = bucket["Name"]
-            if i == self.selected_item:
+            if i == self.cursor:
                 text = Text(text, style="reverse")
             body.add_row(text)
 
         return StandardPanel(body, title="Buckets")
+
+
+class BucketExplorerPanel(PagePanel):
+    bucket = Reactive('')
+    prefix = Reactive('')
+
+    def __init__(self, page):
+        super().__init__(page)
+        self._files = []
+
+    @property
+    def title(self):
+        return self.prefix or self.bucket
+
+    @property
+    def files(self):
+        if self.bucket and not self._files:
+            s3 = boto3.client("s3")
+            resp = s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)
+            self._files = resp["Contents"]
+        return self._files
+
+    items = files
+
+    def render(self):
+        body = StandardTable("Name")
+
+        start, end = self.first_item, self.last_item + 1
+        for i, file in enumerate(self.files[start:end], start):
+            text = file["Key"]
+            if i == self.cursor:
+                text = Text(text, style="reverse")
+            body.add_row(text)
+
+        return StandardPanel(body, title=self.title)
 
 
 class HelpPanel(Widget):
