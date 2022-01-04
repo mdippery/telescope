@@ -3,15 +3,11 @@ import math
 import boto3
 from rich import box
 from rich.align import Align
-from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
 from rich.table import Table
 from textual.reactive import Reactive
 from textual.widget import Widget
-
-
-console = Console()
 
 
 class BucketListPanel(Widget):
@@ -31,7 +27,7 @@ class BucketListPanel(Widget):
 
     @property
     def max_items_per_page(self):
-        return console.size[1] - 2
+        return self.console.size[1] - 2
 
     @property
     def first_item(self):
