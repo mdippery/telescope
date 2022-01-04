@@ -136,7 +136,10 @@ class BucketExplorerPanel(PagePanel):
         if self.bucket and not self._files:
             s3 = boto3.client("s3")
             resp = s3.list_objects(Bucket=self.bucket, Prefix=self.prefix)
-            self._files = resp["Contents"]
+            try:
+                self._files = resp["Contents"]
+            except KeyError:
+                self._files = []
         return self._files
 
     items = files
