@@ -39,7 +39,7 @@ class BucketListPanel(Widget):
 
     @property
     def last_item(self):
-        return min(self.max_items_per_page * self.page, len(self.buckets))
+        return min(self.max_items_per_page * self.page, len(self.buckets)) - 1
 
     @property
     def min_page(self):
@@ -60,7 +60,7 @@ class BucketListPanel(Widget):
     def render(self):
         body = Table("Name", box=None, expand=True, show_header=False)
 
-        start, end = self.first_item, self.last_item
+        start, end = self.first_item, self.last_item + 1
         for i, bucket in enumerate(self.buckets[start:end], start):
             text = bucket["Name"]
             if i == self.selected_item:
@@ -82,15 +82,17 @@ class BucketListPanel(Widget):
             self.console.bell()
 
     def select_next(self):
-        # TODO: Page forward if item on next page
         if self.selected_item + 1 <= self.max_item:
             self.selected_item += 1
+            if self.selected_item > self.last_item:
+                self.page_forward()
         else:
             self.console.bell()
 
     def select_previous(self):
-        # TODO: Page back if item on prev page
         if self.selected_item - 1 >= self.min_item:
             self.selected_item -= 1
+            if self.selected_item < self.first_item:
+                self.page_back()
         else:
             self.console.bell()
