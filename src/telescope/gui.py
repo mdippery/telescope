@@ -59,7 +59,11 @@ class BucketListPanel(Widget):
     def page_forward(self):
         if self.page + 1 <= self.max_page:
             self.page += 1
+        else:
+            self.console.bell()
 
     def page_back(self):
         if self.page - 1 >= self.min_page:
             self.page -= 1
+        else:
+            self.console.bell()
