@@ -11,9 +11,17 @@ from textual.reactive import Reactive
 from textual.widget import Widget
 
 
+def StandardPanel(renderable, title):
+    return Panel(renderable, title=title, border_style="blue", box=box.ROUNDED)
+
+
+def StandardTable(*cols):
+    return Table(*cols, box=None, expand=True, show_header=False)
+
+
 class BucketListPanel(Widget):
     page = Reactive(1)
-    selected_item = Reactive(-1)
+    selected_item = Reactive(0)
 
     def __init__(self, page):
         super().__init__()
@@ -58,7 +66,7 @@ class BucketListPanel(Widget):
         return len(self.buckets) - 1
 
     def render(self):
-        body = Table("Name", box=None, expand=True, show_header=False)
+        body = StandardTable("Name")
 
         start, end = self.first_item, self.last_item + 1
         for i, bucket in enumerate(self.buckets[start:end], start):
@@ -67,17 +75,19 @@ class BucketListPanel(Widget):
                 text = Text(text, style="reverse")
             body.add_row(text)
 
-        return Panel(body, title="Buckets", border_style="blue", box=box.ROUNDED)
+        return StandardPanel(body, title="Buckets")
 
     def page_forward(self):
         if self.page + 1 <= self.max_page:
             self.page += 1
+            self.selected_item = self.first_item
         else:
             self.console.bell()
 
     def page_back(self):
         if self.page - 1 >= self.min_page:
             self.page -= 1
+            self.selected_item = self.last_item
         else:
             self.console.bell()
 
@@ -96,3 +106,16 @@ class BucketListPanel(Widget):
                 self.page_back()
         else:
             self.console.bell()
+
+
+class HelpPanel(Widget):
+    def __init__(self, commands):
+        super().__init__()
+        self.commands = commands
+
+    def render(self):
+        body = StandardTable("Keystroke", "Description")
+        for cmd in self.commands:
+            body.add_row(" / ".join(cmd.keys), cmd.description)
+        # TODO: Add version/copyright to help
+        return StandardPanel(body, title="Help")
