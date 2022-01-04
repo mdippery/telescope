@@ -43,4 +43,4 @@ class BucketListPanel(Widget):
         for bucket in self.buckets[start:end]:
             body.add_row(bucket["Name"])
 
-        return Panel(body, title="Telescope", border_style="blue", box=box.ROUNDED)
+        return Panel(body, title="Buckets", border_style="blue", box=box.ROUNDED)
