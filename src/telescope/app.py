@@ -1,5 +1,6 @@
 from textual.app import App
-from textual.widgets import Placeholder
+
+from telescope.gui import BucketListPanel
 
 
 class Telescope(App):
@@ -7,4 +8,4 @@ class Telescope(App):
         await self.bind("q", "quit")
 
     async def on_mount(self, event):
-        await self.view.dock(Placeholder(name="main"))
+        await self.view.dock(BucketListPanel())
