@@ -6,12 +6,14 @@ from rich.align import Align
 from rich.panel import Panel
 from rich.pretty import Pretty
 from rich.table import Table
+from rich.text import Text
 from textual.reactive import Reactive
 from textual.widget import Widget
 
 
 class BucketListPanel(Widget):
     page = Reactive(1)
+    selected_item = Reactive(-1)
 
     def __init__(self, page):
         super().__init__()
@@ -47,12 +49,23 @@ class BucketListPanel(Widget):
     def max_page(self):
         return math.ceil(len(self.buckets) / self.max_items_per_page)
 
+    @property
+    def min_item(self):
+        return 0
+
+    @property
+    def max_item(self):
+        return len(self.buckets) - 1
+
     def render(self):
         body = Table("Name", box=None, expand=True, show_header=False)
 
         start, end = self.first_item, self.last_item
-        for bucket in self.buckets[start:end]:
-            body.add_row(bucket["Name"])
+        for i, bucket in enumerate(self.buckets[start:end], start):
+            text = bucket["Name"]
+            if i == self.selected_item:
+                text = Text(text, style="reverse")
+            body.add_row(text)
 
         return Panel(body, title="Buckets", border_style="blue", box=box.ROUNDED)
 
@@ -65,5 +78,19 @@ class BucketListPanel(Widget):
     def page_back(self):
         if self.page - 1 >= self.min_page:
             self.page -= 1
+        else:
+            self.console.bell()
+
+    def select_next(self):
+        # TODO: Page forward if item on next page
+        if self.selected_item + 1 <= self.max_item:
+            self.selected_item += 1
+        else:
+            self.console.bell()
+
+    def select_previous(self):
+        # TODO: Page back if item on prev page
+        if self.selected_item - 1 >= self.min_item:
+            self.selected_item -= 1
         else:
             self.console.bell()
