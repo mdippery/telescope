@@ -8,4 +8,4 @@ class Telescope(App):
         await self.bind("q", "quit")
 
     async def on_mount(self, event):
-        await self.view.dock(BucketListPanel())
+        await self.view.dock(BucketListPanel(1))
