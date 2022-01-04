@@ -31,11 +31,13 @@ class BucketListPanel(Widget):
 
     @property
     def first_item(self):
+        if self.page == self.max_page:
+            return len(self.buckets) - self.max_items_per_page
         return self.max_items_per_page * (self.page - 1)
 
     @property
     def last_item(self):
-        return self.max_items_per_page * self.page
+        return min(self.max_items_per_page * self.page, len(self.buckets))
 
     @property
     def min_page(self):
@@ -55,7 +57,6 @@ class BucketListPanel(Widget):
         return Panel(body, title="Buckets", border_style="blue", box=box.ROUNDED)
 
     def page_forward(self):
-        # TODO: Don't show blanks at end of last page
         if self.page + 1 <= self.max_page:
             self.page += 1
 
