@@ -15,6 +15,14 @@ class BucketListPanel(Widget):
     def __init__(self, page):
         super().__init__()
         self.page = page
+        self._buckets = None
+
+    @property
+    def buckets(self):
+        if not self._buckets:
+            s3 = boto3.client("s3")
+            self._buckets = s3.list_buckets()["Buckets"]
+        return self._buckets
 
     @property
     def max_items(self):
@@ -32,8 +40,7 @@ class BucketListPanel(Widget):
         body = Table("Name", box=None, expand=True, show_header=False)
 
         start, end = self.first_item, self.last_item
-        s3 = boto3.client("s3")
-        for bucket in s3.list_buckets()["Buckets"][self.first_item:self.last_item]:
+        for bucket in self.buckets[start:end]:
             body.add_row(bucket["Name"])
 
         return Panel(body, title="Telescope", border_style="blue", box=box.ROUNDED)
