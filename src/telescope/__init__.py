@@ -1,11 +1,11 @@
-import datetime
-import os.path
+from datetime import datetime
 from importlib.metadata import version
+from pathlib import Path
 
 
 __author__ = "Michael Dippery <michael@monkey-robot.com>"
 __version__ = version("aws-telescope")
-__date__ = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.dirname(__file__))).date()
+__date__ = datetime.fromtimestamp(Path(__file__).parent.stat().st_mtime).date()
 __credits__ = f"""
 Copyright (C) 2022 {__author__}
 
